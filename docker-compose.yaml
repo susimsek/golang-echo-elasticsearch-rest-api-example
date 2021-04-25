@@ -1,0 +1,45 @@
+version: '3.8'
+services:
+  app:
+    build: ./
+    container_name: app
+    restart: ${RESTART_POLICY}
+    environment:
+      - TZ
+      - SERVER_PORT
+      - ELASTICSEARCH_URL
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_IMAGE_TAG}
+    container_name: elasticsearch
+    restart: ${RESTART_POLICY}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    environment:
+      - TZ
+      - discovery.type
+      - ES_JAVA_OPTS
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+      - 9300:9300
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:${ELASTIC_IMAGE_TAG}
+    container_name: kibana
+    restart: ${RESTART_POLICY}
+    environment:
+      - TZ
+      - ELASTICSEARCH_URL
+    ports:
+      - 5601:5601
+
+volumes:
+  elasticsearch_data:
+    driver: local
+    name: elasticsearch_data
